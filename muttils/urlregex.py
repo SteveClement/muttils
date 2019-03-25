@@ -209,7 +209,7 @@ class urlregex(object):
                 proto_re = re.compile(r'^((https?|s?ftp|gopher)://|mailto:)',
                                       re.IGNORECASE)
                 truncs = [proto_re.sub('', u, 1) for u in self.items]
-                pairs = zip(self.items, truncs)
+                pairs = list(zip(self.items, truncs))
                 self.items = []
                 for u, t in pairs:
                     if truncs.count(t) == 1 or len(u) > len(t):

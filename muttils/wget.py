@@ -1,12 +1,12 @@
 # $Id$
 
-import os.path, urllib2
+import os.path, urllib.request, urllib.error, urllib.parse
 from muttils import urlregex, util
 
 class wget(object):
     def __init__(self, ui, *headers):
         self.ui = ui
-        self.opener = urllib2.build_opener()
+        self.opener = urllib.request.build_opener()
         if headers:
             self.opener.addheaders = headers
 
@@ -31,7 +31,7 @@ class wget(object):
             else:
                 raise util.DeadMan('%s: invalid request instruction')
             fp.close()
-        except urllib2.URLError, inst:
+        except urllib.error.URLError as inst:
             if util.safehasattr(inst, 'reason'):
                 self.ui.warn('failed to reach a server for %s\n' % req,
                              'reason: %s\n' % inst)
@@ -52,5 +52,5 @@ class wget(object):
                     fp = open(path, 'wb')
                     fp.write(s)
                     fp.close()
-                except IOError, inst:
+                except IOError as inst:
                     raise util.DeadMan(inst)

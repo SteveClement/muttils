@@ -3,12 +3,13 @@
 
 # $Id$
 
-import ConfigParser, os.path, sys
+import configparser, os.path, sys
 from muttils import util
+
 
 class ui(object):
     config = None
-    updated = False # is config already up to date?
+    updated = False  # is config already up to date?
     # ui attributes that are governed by options
     proto = 'all'   # url protocol scheme
     decl = False    # only care about urls prefixed with scheme
@@ -32,14 +33,14 @@ class ui(object):
         self.rcpath = rcpath
         if self.rcpath is None:
             self.rcpath = self.defrcpath
-        self.config = ConfigParser.SafeConfigParser()
+        self.config = configparser.SafeConfigParser()
 
     def updateconfig(self):
         if self.updated:
             return
         try:
             self.config.read(self.rcpath)
-        except ConfigParser.ParsingError, inst:
+        except configparser.ParsingError as inst:
             raise util.DeadMan(inst)
         self.updated = True
 
@@ -60,7 +61,7 @@ class ui(object):
         cfg = self.configitem(section, name)
         if cfg is None:
             return default or []
-        if isinstance(cfg, basestring):
+        if isinstance(cfg, str):
             return cfg.replace(',', ' ').split()
         return cfg
 
@@ -70,7 +71,7 @@ class ui(object):
             return default
         try:
             return int(cfg)
-        except ValueError, inst:
+        except ValueError as inst:
             raise util.DeadMan(inst)
 
     def resolveopts(self, options):
@@ -96,7 +97,7 @@ class ui(object):
             options['decl'] = True
         del options['midrelax']
         try:
-            for o in options.iterkeys():
+            for o in options.keys():
                 setattr(self, o, options[o])
         except KeyError:
             raise util.DeadMan('%s: invalid option' % o)

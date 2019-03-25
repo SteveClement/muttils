@@ -57,7 +57,7 @@ class tpager(object):
         else:
             formfunc = bracketformat
         self.itemsdict = dict(enumerate(self.items))
-        for k, v in self.itemsdict.iteritems():
+        for k, v in self.itemsdict.items():
             yield formfunc(k + 1, v)
 
     def addpage(self, buff, lines, pn):
@@ -105,7 +105,7 @@ class tpager(object):
         '''Displays a page of items, header and choice menu.
         Returns response and validity of choice.'''
         self.ui.write(header + self.pages[pn])
-        resp = raw_input(self.coltrunc(menu, self.cols - self.kmaxl() - 3))
+        resp = input(self.coltrunc(menu, self.cols - self.kmaxl() - 3))
         valid = True
         try:
             self.items = [self.itemsdict[int(resp) - 1]]

@@ -2,7 +2,7 @@
 
 PREFIX=$(shell python -c "import sys; print sys.prefix")
 export PREFIX
-PYTHON=python
+PYTHON=python3
 FIND=find
 
 .PHONY: help all local build clean install install-home dist distclean

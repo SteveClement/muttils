@@ -33,5 +33,5 @@ def run():
         s = sigpager.signature(options.defsig, options.sigdir, options.tail,
                                options.sigsep, args)
         s.sign()
-    except (util.DeadMan, IOError, OSError), inst:
+    except (util.DeadMan, IOError, OSError) as inst:
         sys.exit(inst)

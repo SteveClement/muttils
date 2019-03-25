@@ -30,5 +30,5 @@ def run():
     try:
         v = viewhtmlmsg.viewhtml(options.safe, options.keep, options.app, args)
         v.view()
-    except (util.DeadMan, IOError, KeyboardInterrupt), inst:
+    except (util.DeadMan, IOError, KeyboardInterrupt) as inst:
         sys.exit(inst)

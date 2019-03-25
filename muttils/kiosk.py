@@ -1,24 +1,24 @@
 # $Id$
 
-import email, email.Generator, email.Parser, email.Errors
-import mailbox, nntplib, os, re, tempfile, time, urllib
+import email, email.generator, email.parser, email.errors
+import mailbox, nntplib, os, re, tempfile, time, urllib.request, urllib.parse, urllib.error
 from muttils import pybrowser, util, wget
 
 def _makequery(mid):
     '''Reformats Message-ID to google query.'''
     ggroups = 'http://groups.google.com/groups'
     query = {'selm': mid}
-    return '%s?%s' % (ggroups,  urllib.urlencode(query))
+    return '%s?%s' % (ggroups,  urllib.parse.urlencode(query))
 
 def _getraw(msgurl):
     query = {'dmode': 'source', 'output': 'gplain'}
-    return '%s?%s' % (msgurl, urllib.urlencode(query))
+    return '%s?%s' % (msgurl, urllib.parse.urlencode(query))
 
 def _msgfactory(fp):
     try:
-        p = email.Parser.HeaderParser()
+        p = email.parser.HeaderParser()
         return p.parse(fp, headersonly=True)
-    except email.Errors.HeaderParseError:
+    except email.errors.HeaderParseError:
         return ''
 
 def _getmhier():
@@ -44,7 +44,7 @@ def _mkunixfrom(msg):
     if msg['return-path']:
         ufrom = msg['return-path'][1:-1]
     else:
-        ufrom = email.Utils.parseaddr(msg.get('from', 'nobody'))[1]
+        ufrom = email.utils.parseaddr(msg.get('from', 'nobody'))[1]
     msg.set_unixfrom('From %s  %s' % (ufrom, time.asctime()))
     return msg
 
@@ -81,9 +81,9 @@ class kiosk(object):
         finally:
             fp.close()
         try:
-            p = email.Parser.Parser()
+            p = email.parser.Parser()
             check = p.parsestr(testline, headersonly=True)
-        except email.Errors.HeaderParseError, inst:
+        except email.errors.HeaderParseError as inst:
             raise util.DeadMan(inst)
         if check.get_unixfrom():
             self.muttone = False
@@ -121,7 +121,7 @@ class kiosk(object):
 
     def goobrowse(self):
         '''Visits given urls with browser and exits.'''
-        items = map(_makequery, self.items)
+        items = list(map(_makequery, self.items))
         b = pybrowser.browser(parentui=self.ui, items=items)
         b.urlvisit()
 
@@ -150,7 +150,7 @@ class kiosk(object):
             try:
                 nserv = nntplib.NNTP(sname, readermode=True, usenetrc=False)
             except (nntplib.NNTPPermanentError,
-                    nntplib.NNTPTemporaryError), inst:
+                    nntplib.NNTPTemporaryError) as inst:
                 self.ui.warn('%s\n' % inst)
                 return
         for mid in self.items[:]:
@@ -182,17 +182,17 @@ class kiosk(object):
         else:
             try:
                 fp = open(path, 'rb')
-            except IOError, inst:
+            except IOError as inst:
                 self.ui.warn('%s\n' % inst)
                 return
             mbox = mailbox.PortableUnixMailbox(fp, _msgfactory)
         self.ui.note('searching %s ' % path)
         while True:
             try:
-                msg = mbox.next()
+                msg = next(mbox)
                 self.ui.write('.')
                 self.ui.flush()
-            except IOError, inst:
+            except IOError as inst:
                 self.ui.warn('\n%s\n' % inst)
                 break
             if msg is None:
@@ -242,14 +242,14 @@ class kiosk(object):
     def maskompile(self):
         try:
             self.ui.mask = re.compile(r'%s' % self.ui.mask)
-        except re.error, inst:
+        except re.error as inst:
             raise util.DeadMan("%s in pattern `%s'" % (inst, self.ui.mask))
 
     def openkiosk(self, firstid):
         '''Opens mutt on kiosk mailbox.'''
         fp = open(self.ui.kiosk, 'ab')
         try:
-            g = email.Generator.Generator(fp, maxheaderlen=0)
+            g = email.generator.Generator(fp, maxheaderlen=0)
             for msg in self.msgs:
                 # delete read status and local server info
                 for h in ('status', 'xref'):

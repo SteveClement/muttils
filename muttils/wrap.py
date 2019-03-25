@@ -7,7 +7,7 @@ def _mrex(pat):
     '''Checks and returns MULTILINE regex of pat.'''
     try:
         return re.compile(r'%s' % pat, re.MULTILINE)
-    except re.error, inst:
+    except re.error as inst:
         raise util.DeadMan("error in pattern `%s': %s" % (pat, inst))
 
 def _unmangle(mobj):
@@ -54,7 +54,7 @@ class wrap(object):
 
     def __init__(self, opts, inp):
         self.inp = inp or None # list of files or stdin
-        for k in opts.iterkeys():
+        for k in opts.keys():
             setattr(self, k, opts[k])
         # wrap width falls back on width if neither respect nor ipar
         # are specified in that order, and finally to 78
@@ -100,7 +100,7 @@ class wrap(object):
         elif fraglen > 1:
             fragtails = self.hyph.findall(word) + ['']
             # -> ['.','//','-','']
-            frags = map(''.join, zip(frags, fragtails))
+            frags = list(map(''.join, list(zip(frags, fragtails))))
             # -> ['what.','a//','bull-','shit!']
             fragspace = []
             while frags:
@@ -182,14 +182,14 @@ class wrap(object):
         '''Puts out lines unwrapped while they are not empty.'''
         while self.line[:-1]:
             self.outadd(self.line)
-            self.line = lit.next()
+            self.line = next(lit)
 
     def literator(self, lit):
         '''Iterates over lines of file object.'''
         try:
             skipheaders = self.email
             while True:
-                self.line = lit.next()
+                self.line = next(lit)
                 sigsep = self.line == '-- \n'
                 if skipheaders or sigsep:
                     if sigsep:

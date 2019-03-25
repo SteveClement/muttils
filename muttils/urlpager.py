@@ -21,7 +21,7 @@ class urlpager(urlcollector.urlcollector, tpager.tpager):
             it.terminit()
         if msg:
             self.ui.write(msg)
-        answer = raw_input(prompt)
+        answer = input(prompt)
         if not self.files:
             it.reinit()
         return answer
@@ -58,7 +58,7 @@ class urlpager(urlcollector.urlcollector, tpager.tpager):
             if self.ui.ftpdir:
                 # otherwise eventual download to cwd
                 self.ui.ftpdir = util.savedir(self.ui.ftpdir)
-                cwd = os.getcwdu()
+                cwd = os.getcwd()
                 os.chdir(self.ui.ftpdir)
             cs = [self.ui.configitem('net', 'ftpclient', default='ftp')]
             # for ftp programs that have more of a browser interface

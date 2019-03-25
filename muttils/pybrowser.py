@@ -29,7 +29,7 @@ class browser(object):
             self.ui.app = self.ui.configitem('net', 'app')
         try:
             self.ui.app = webbrowser.get(self.ui.app)
-        except webbrowser.Error, inst:
+        except webbrowser.Error as inst:
             raise PybrowserError(inst)
         try:
             # lynx.old -> lynx, lynx.exe -> lynx

@@ -3,8 +3,8 @@
 
 # $Id$
 
-import email, email.Errors, email.Iterators, email.Utils
-import os.path, re, shutil, sys, tempfile
+import email, email.errors, email.iterators, email.utils
+import os.path, re, shutil, sys, tempfile, chardet
 from muttils import pybrowser, ui, util
 
 try:
@@ -47,13 +47,17 @@ class viewhtml(pybrowser.browser):
             if self.inp:
                 if len(self.inp) > 1:
                     raise util.DeadMan('only 1 argument allowed')
-                fp = open(self.inp[0], 'rb')
+                fp = open(self.inp[0], 'rb', errors='replace')
             else:
                 fp = sys.stdin
-            msg = email.message_from_file(fp)
+                try:
+                    msg = email.message_from_file(fp)
+                except UnicodeDecodeError:
+                    print('This message has some strange unicode characters. Investigate manually.')
+                    sys.exit(1)
             if self.inp:
                 fp.close()
-        except email.Errors.MessageParseError, inst:
+        except email.errors.MessageParseError as inst:
             raise util.DeadMan(inst)
         if not msg:
             raise util.DeadMan('input not a message')
@@ -61,16 +65,21 @@ class viewhtml(pybrowser.browser):
             hint = ('make sure input is a raw message,'
                     ' in mutt: unset pipe_decode')
             raise util.DeadMan('no message-id found', hint=hint)
-        htiter = email.Iterators.typed_subpart_iterator(msg, subtype='html')
+        htiter = email.iterators.typed_subpart_iterator(msg, subtype='html')
         try:
-            html = htiter.next()
+            html = next(htiter)
         except StopIteration:
             raise util.DeadMan('no html found')
         htmldir = tempfile.mkdtemp('', 'viewhtmlmsg.')
         try:
             htmlfile = os.path.join(htmldir, 'index.html')
-            charset = html.get_param('charset')
-            html = html.get_payload(decode=True)
+            charsdet=chardet.detect(bytes(html.get_payload(decode=True)))
+            if charsdet['confidence'] > 0.7:
+                charset = chardet.detect(bytes(html.get_payload(decode=True)))['encoding']
+            else:
+                charset = html.get_param('charset')
+
+            html = html.get_payload(decode=True).decode(charset)
             if charset:
                 charsetmeta = '<meta charset="%s">' % charset
                 if '<head>' in html:
@@ -84,7 +93,7 @@ class viewhtml(pybrowser.browser):
                       part.get_param('name', 'prefix_%d' % fc))
                 if part['content-id']:
                     # safe ascii filename: replace it with cid
-                    fn = email.Utils.unquote(part['content-id'])
+                    fn = email.utils.unquote(part['content-id'])
                     html = html.replace('"cid:%s"' % fn, "%s" % fn)
                 fpay = part.get_payload(decode=True)
                 if fpay:
@@ -95,7 +104,7 @@ class viewhtml(pybrowser.browser):
                 spat = r'(src|background)\s*=\s*["\']??https??://[^"\'>]*["\'>]'
                 html = re.sub(spat, r'\1="#"', html)
             fp = open(htmlfile, 'wb')
-            fp.write(html)
+            fp.write(bytes(html, charset))
             fp.close()
             self.items = [htmlfile]
             if self.keep:

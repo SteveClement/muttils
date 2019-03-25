@@ -83,7 +83,7 @@ def systemcall(cs, notty=None, screen=None):
             r = subprocess.call(cs)
         if r:
             raise DeadMan('%s returned %i' % (cs[0], r))
-    except OSError, inst:
+    except OSError as inst:
         raise DeadMan(inst)
 
 def pipeline(cs):

@@ -56,5 +56,5 @@ def run():
         w = wrap.wrap(options.__dict__, args)
         w.formwrap()
         sys.stdout.writelines(w.olines)
-    except (util.DeadMan, IOError, KeyboardInterrupt), inst:
+    except (util.DeadMan, IOError, KeyboardInterrupt) as inst:
         sys.exit(inst)

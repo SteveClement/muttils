@@ -4,7 +4,7 @@
 
 import sys
 if not hasattr(sys, 'version_info') or sys.version_info < (2, 4):
-    raise SystemExit, 'Muttils requires Python 2.4 or later'
+    raise SystemExit('Muttils requires Python 2.4 or later')
 
 from distutils.core import setup
 import os.path, subprocess, time
@@ -21,13 +21,24 @@ def runhg(cmd):
               and not e.startswith('warning: Not importing')]
     if err:
         return ''
-    return out
+    return out.decode('utf-8')
+
+def rungit(cmd):
+    out, err = subprocess.Popen(['git'] + cmd,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE).communicate()
+    return out.decode('utf-8').rstrip().strip('"')
 
 version = ''
+
+if os.path.isdir('.git'):
+    v = rungit(['log', '-1', '--format="%h"'])
+    version = 'git-' + v
 
 if os.path.isdir('.hg'):
     v = runhg(['id', '-i', '-t'])
     v = v.split()
+
     while len(v) > 1 and v[-1][0].isalpha():
         v.pop()
     if len(v) > 1: # tag found

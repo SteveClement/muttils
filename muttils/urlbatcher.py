@@ -44,11 +44,11 @@ class urlbatcher(urlcollector.urlcollector):
             uspec = util.plural(len(self.items),
                                 ('url', 'message-id')[self.ui.proto=='mid'])
             yorn = '%s\nretrieve the above %s? yes, [No] ' % (ulist, uspec)
-            answer = raw_input(yorn).lower()
+            answer = input(yorn).lower()
         else:
             msg = 'no %ss found. [ok] ' % ('url',
                                            'message-id')[self.ui.proto=='mid']
-            raw_input(msg)
+            input(msg)
             answer = ''
         if not self.files:
             it.reinit()

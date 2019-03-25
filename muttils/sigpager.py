@@ -50,18 +50,19 @@ class signature(tpager.tpager):
             self.items = [sig for sig in self.sigs if weed_re.search(sig)]
         else:
             self.items = self.sigs
-        random.shuffle(self.items)
+        # I am not sure why randomizing this list would be a good idea
+        #random.shuffle(self.items)
         return self.interact()
 
     def checkpattern(self, pat):
         try:
             return re.compile(r'%s' % pat, re.UNICODE|re.IGNORECASE)
-        except re.error, inst:
+        except re.error as inst:
             self.ui.warn('%s in pattern %s\n' % (inst, pat))
             prompt = ('[choose from %d signatures], new pattern: '
                     % len(self.sigs))
             try:
-                pat = raw_input(prompt)
+                pat = input(prompt)
             except KeyboardInterrupt:
                 pat = ''
             if pat:

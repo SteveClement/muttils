@@ -26,5 +26,5 @@ def run():
     try:
         b = pybrowser.browser(items=args, app=options.app, evalurl=True)
         b.urlvisit()
-    except util.DeadMan, inst:
+    except util.DeadMan as inst:
         sys.exit(inst)

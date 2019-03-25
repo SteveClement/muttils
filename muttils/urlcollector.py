@@ -1,7 +1,7 @@
 # $Id$
 
 import os, re, sys, tempfile
-import email, email.Iterators, email.Utils, email.Errors
+import email, email.iterators, email.utils, email.errors
 import mailbox
 from muttils import urlregex, util
 
@@ -9,7 +9,7 @@ def _msgfactory(fp):
     try:
         fp.seek(0)
         return email.message_from_file(fp)
-    except email.Errors.MessageParseError:
+    except email.errors.MessageParseError:
         return None
 
 class urlcollector(urlregex.urlregex):
@@ -29,7 +29,7 @@ class urlcollector(urlregex.urlregex):
         for header in headers:
             vals = msg.get_all(header)
             if vals:
-                pairs = email.Utils.getaddresses(vals)
+                pairs = email.utils.getaddresses(vals)
                 self.items += [addr for rname, addr in pairs if addr]
 
     def msgharvest(self, msg):
@@ -56,7 +56,7 @@ class urlcollector(urlregex.urlregex):
         if oldct:
             del msg['content-type']
             msg['Content-Type'] = oldct
-        for part in email.Iterators.typed_subpart_iterator(msg):
+        for part in email.iterators.typed_subpart_iterator(msg):
             # try getting quoted urls spanning more than 1 line
             text = self.quote_re.sub('', part.get_payload(decode=True))
             # handle DelSp (rfc 3675)
@@ -94,7 +94,7 @@ class urlcollector(urlregex.urlregex):
                 textlist = [] # list of strings to search
                 mbox = mailbox.PortableUnixMailbox(fp, _msgfactory)
                 while msg is not None:
-                    msg = mbox.next()
+                    msg = next(mbox)
                     if msg:
                         textlist += self.msgharvest(msg)
         finally:
@@ -122,6 +122,6 @@ class urlcollector(urlregex.urlregex):
         if self.ui.pat and self.items:
             try:
                 ui_re = re.compile(r'%s' % self.ui.pat, re.IGNORECASE)
-            except re.error, err:
+            except re.error as err:
                 raise util.DeadMan("%s in pattern `%s'" % (err, self.ui.pat))
             self.items = [i for i in self.items if ui_re.search(i)]
